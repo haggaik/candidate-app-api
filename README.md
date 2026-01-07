@@ -21,7 +21,7 @@ GET /api/jobs/ with pagination
 POST /api/applications/ with validation  
 Email format validation  
 SQLite database with auto-migrations  
-Unit tests (5 tests, all passing)  
+Unit tests (8 tests, all passing)  
 **BONUS**: GET /api/applications/{id}/ endpoint  
 **BONUS**: Pagination implemented  
 
@@ -221,15 +221,8 @@ curl "http://127.0.0.1:8000/api/applications/5/"
 
 ### Testing
 
-5 comprehensive unit tests covering:
-1. Successful application submission
-2. Missing required fields validation
-3. Invalid email format validation
-4. Application retrieval by ID
-5. Active jobs filtering
-
-**Test Framework**: pytest 9.0.2  
-**HTTP Client**: FastAPI TestClient  
+8 tests in `tests/test_applications.py`:
+`test_create_application_success`, `test_create_application_missing_fields`, `test_create_application_invalid_email`, `test_create_application_job_not_found`, `test_get_application_by_id`, `test_get_application_not_found`, `test_list_jobs_returns_active_only`, `test_list_jobs_invalid_pagination`
 
 Run: `pytest -v`
 
@@ -288,8 +281,7 @@ Run: `pytest -v`
 
 ## Requirements
 
-- Python 3.10+
-- See [requirements.txt](requirements.txt) for full dependency list
+See `requirements.txt`.
 
 ## Author
 
