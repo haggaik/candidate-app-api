@@ -24,6 +24,15 @@ def create_job(title: str = "Test Job", is_active: bool = True) -> models.Job:
         db.close()
 
 
+def get_missing_id(model) -> int:
+    db = SessionLocal()
+    try:
+        max_id = db.query(model.id).order_by(model.id.desc()).first()
+        return (max_id[0] if max_id else 0) + 1
+    finally:
+        db.close()
+
+
 def test_create_application_success():
     job = create_job()
     payload = {
@@ -57,6 +66,17 @@ def test_create_application_invalid_email():
     assert resp.status_code == 422
 
 
+def test_create_application_job_not_found():
+    missing_job_id = get_missing_id(models.Job)
+    payload = {
+        "job_id": missing_job_id,
+        "candidate_name": "Drew",
+        "email": "drew@example.com",
+    }
+    resp = client.post("/api/applications/", json=payload)
+    assert resp.status_code == 404
+
+
 def test_get_application_by_id():
     job = create_job("Job3")
     payload = {
@@ -73,6 +93,12 @@ def test_get_application_by_id():
     assert get_resp.json()["candidate_name"] == "Cathy"
 
 
+def test_get_application_not_found():
+    missing_app_id = get_missing_id(models.Application)
+    resp = client.get(f"/api/applications/{missing_app_id}/")
+    assert resp.status_code == 404
+
+
 def test_list_jobs_returns_active_only():
     create_job(title="Active Job", is_active=True)
     create_job(title="Inactive Job", is_active=False)
@@ -83,3 +109,14 @@ def test_list_jobs_returns_active_only():
     titles = [j["title"] for j in resp.json()]
     assert "Active Job" in titles
     assert "Inactive Job" not in titles
+
+
+def test_list_jobs_invalid_pagination():
+    resp = client.get("/api/jobs/?page=0")
+    assert resp.status_code == 400
+
+    resp = client.get("/api/jobs/?per_page=0")
+    assert resp.status_code == 400
+
+    resp = client.get("/api/jobs/?per_page=101")
+    assert resp.status_code == 400
