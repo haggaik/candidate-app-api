@@ -82,3 +82,15 @@ class Application(Base):
             f"job_id={self.job_id} "
             f"email={self.email!r}>"
         )
+
+
+class ApiKey(Base):
+    __tablename__ = "api_keys"
+
+    id = Column(Integer, primary_key=True, index=True)
+    key = Column(String(128), nullable=False, unique=True, index=True)
+    is_active = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    def __repr__(self) -> str:
+        return f"<ApiKey id={self.id} active={self.is_active}>"
